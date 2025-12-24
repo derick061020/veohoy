@@ -1,21 +1,12 @@
 workflows:
-  ios-unsigned:
-    name: iOS Build (Unsigned)
-    max_build_duration: 60
-    instance_type: mac_mini
+  ios-release-no-shorebird:
+    name: iOS Release
     environment:
-      vars:
-        XCODE_WORKSPACE: "Runner.xcworkspace"
-        XCODE_SCHEME: "Runner"
+      flutter: stable
+      xcode: latest
     scripts:
-      - name: Install pods
-        script: |
-          cd ios && pod install --repo-update && cd ..
-      - name: Build unsigned IPA
-        script: |
-          xcodebuild clean -workspace "$XCODE_WORKSPACE" -scheme "$XCODE_SCHEME" -configuration Release
-          mkdir -p build/ios/unsigned
-          xcodebuild -workspace "$XCODE_WORKSPACE" -scheme "$XCODE_SCHEME" -configuration Release -archivePath build/ios/archive/Runner.xcarchive archive
-          xcodebuild -exportArchive -archivePath build/ios/archive/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios/unsigned -allowProvisioningUpdates
+      - flutter build ios --simulator
+      - mkdir -p build/ios/ipa
+      - zip -r build/ios/ipa/Runner.app.zip build/ios/iphonesimulator/Runner.app
     artifacts:
-      - build/ios/unsigned/*.ipa
+      - build/ios/ipa/Runner.app.zip
