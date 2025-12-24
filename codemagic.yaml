@@ -1,21 +1,21 @@
 workflows:
-  android-workflow:
-    name: Android Build
+  ios-unsigned:
+    name: iOS Build (Unsigned)
     max_build_duration: 60
+    instance_type: mac_mini
     environment:
-      groups:
-        - keystore
+      vars:
+        XCODE_WORKSPACE: "Runner.xcworkspace"
+        XCODE_SCHEME: "Runner"
     scripts:
-      - name: Install Flutter
+      - name: Install pods
         script: |
-          flutter --version
-          flutter pub get
-      - name: Build Android
+          cd ios && pod install --repo-update && cd ..
+      - name: Build unsigned IPA
         script: |
-          flutter build apk --release
+          xcodebuild clean -workspace "$XCODE_WORKSPACE" -scheme "$XCODE_SCHEME" -configuration Release
+          mkdir -p build/ios/unsigned
+          xcodebuild -workspace "$XCODE_WORKSPACE" -scheme "$XCODE_SCHEME" -configuration Release -archivePath build/ios/archive/Runner.xcarchive archive
+          xcodebuild -exportArchive -archivePath build/ios/archive/Runner.xcarchive -exportOptionsPlist exportOptions.plist -exportPath build/ios/unsigned -allowProvisioningUpdates
     artifacts:
-      - build/app/outputs/flutter-apk/*.apk
-    publishing:
-      email:
-        recipients:
-          - your-email@example.com
+      - build/ios/unsigned/*.ipa
