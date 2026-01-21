@@ -1,20 +1,28 @@
 # ios/Podfile
 
+# Define la plataforma mínima de iOS
 platform :ios, '15.0'
 
+# Usa frameworks estáticos para evitar conflictos con Firebase
 use_frameworks! :linkage => :static
+
+# Permite headers modulares
 use_modular_headers!
+
+# Evita warnings de pods
 inhibit_all_warnings!
 
+# Define el target principal
 target 'Runner' do
-  # Instala automáticamente los pods de Flutter
-  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  # No necesitamos declarar pods manualmente,
+  # Flutter + Codemagic manejarán todos los plugins automáticamente
 end
 
+# Post install fixes
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
-      # Permite headers no modulares
+      # Permite headers no modulares, necesario para Firebase
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
     end
   end
