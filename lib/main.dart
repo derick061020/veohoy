@@ -1,26 +1,46 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+
+
+
+final FlutterLocalNotificationsPlugin localNotifications =
+    FlutterLocalNotificationsPlugin();
+
+InAppWebViewController? globalWebViewController;
+
+Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Configuración para pantalla completa
-  SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.edgeToEdge
-  );
 
-  
-  // Configurar colores de la barra de sistema
+  // 🔥 NECESARIO para flutter_inappwebview
+  if (Platform.isAndroid) {
+    await InAppWebViewController.setWebContentsDebuggingEnabled(true);
+  }
+
+  await Firebase.initializeApp();
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
+
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.white,
     statusBarIconBrightness: Brightness.light,
-    systemStatusBarContrastEnforced: false,
     systemNavigationBarColor: Colors.white,
     systemNavigationBarIconBrightness: Brightness.dark,
-    systemNavigationBarContrastEnforced: true,
   ));
-  
+
   runApp(MyApp());
 }
 
@@ -56,31 +76,157 @@ class MyHomeScreen extends StatefulWidget {
 }
 
 class _MyHomeScreenState extends State<MyHomeScreen> {
-  late final WebViewController _controller;
+  InAppWebViewController? _controller;
+  late PullToRefreshController _pullToRefreshController;
+
 
   @override
-  void initState() {
-    super.initState();
-    _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(Colors.white) // Fondo blanco para el WebView
-      ..loadRequest(Uri.parse('https://veohoy.com'));
+void initState() {
+  super.initState();
+
+  _pullToRefreshController = PullToRefreshController(
+    settings: PullToRefreshSettings(
+      color: Colors.blue,
+    ),
+    onRefresh: () async {
+      await _controller?.reload();
+    },
+  );
+
+  _initPushNotifications();
+}
+
+
+Future<void> _initPushNotifications() async {
+  await FirebaseMessaging.instance.requestPermission();
+
+  await FirebaseMessaging.instance.subscribeToTopic('all');
+  const androidSettings =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const settings = InitializationSettings(android: androidSettings);
+
+  await localNotifications.initialize(
+    settings,
+    onDidReceiveNotificationResponse: (response) {
+      final url = response.payload;
+      if (url != null && globalWebViewController != null) {
+        globalWebViewController?.loadUrl(
+  urlRequest: URLRequest(url: WebUri(url)),
+);
+      }
+    },
+  );
+
+  FirebaseMessaging.onMessage.listen(_showNotification);
+
+  FirebaseMessaging.onMessageOpenedApp.listen((message) {
+    final url = message.data['url'];
+    if (url != null && globalWebViewController != null) {
+      globalWebViewController?.loadUrl(
+  urlRequest: URLRequest(url: WebUri(url)),
+);
+    }
+  });
+}
+Future<String?> _downloadImage(String imageUrl) async {
+  try {
+    final response = await http.get(Uri.parse(imageUrl));
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/thumb.jpg');
+    await file.writeAsBytes(response.bodyBytes);
+    return file.path;
+  } catch (_) {
+    return null;
+  }
+}
+Future<void> _showNotification(RemoteMessage message) async {
+  final title = message.notification?.title ?? '';
+  final body = message.notification?.body ?? '';
+  final url = message.data['url'];
+  final imageUrl = message.data['image'];
+
+  BigPictureStyleInformation? style;
+
+  if (imageUrl != null) {
+    final imagePath = await _downloadImage(imageUrl);
+    if (imagePath != null) {
+      style = BigPictureStyleInformation(
+        FilePathAndroidBitmap(imagePath),
+        contentTitle: title,
+        summaryText: body,
+      );
+    }
   }
 
+  final androidDetails = AndroidNotificationDetails(
+    'videos',
+    'Videos',
+    channelDescription: 'Notificaciones de videos',
+    importance: Importance.max,
+    priority: Priority.high,
+    styleInformation: style,
+  );
+
+  final details = NotificationDetails(android: androidDetails);
+
+  await localNotifications.show(
+    DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    title,
+    body,
+    details,
+    payload: url,
+  );
+}
+
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white, // Fondo blanco para el Scaffold
-      body: Container(
-        color: Colors.white, // Fondo blanco para el contenedor
-        child: SafeArea(
-          top: true,
-          bottom: true, // Desactivamos el SafeArea inferior para manejar el color manualmente
-          child: WebViewWidget(
-            controller: _controller,
-          ),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.white,
+    body: SafeArea(
+      child: InAppWebView(
+        initialUrlRequest: URLRequest(
+          url: WebUri('https://veohoy.com'),
         ),
+
+        pullToRefreshController: _pullToRefreshController,
+
+        onWebViewCreated: (controller) {
+          _controller = controller;
+          globalWebViewController = controller;
+        },
+
+        // 🔥 ESTO ES LO QUE FALTABA
+        shouldOverrideUrlLoading: (controller, navigationAction) async {
+          return NavigationActionPolicy.ALLOW;
+        },
+
+        onLoadStop: (controller, url) {
+          _pullToRefreshController.endRefreshing();
+        },
+
+        onLoadError: (controller, url, code, message) {
+          _pullToRefreshController.endRefreshing();
+        },
+
+        initialSettings: InAppWebViewSettings(
+          javaScriptEnabled: true,
+          useShouldOverrideUrlLoading: true,
+          allowsInlineMediaPlayback: false,
+          mediaPlaybackRequiresUserGesture: false,
+          userAgent: Platform.isAndroid ? "com.ccdevllc.veohoy.android" : "com.ccdevllc.veohoy.ios", // 🔥 AQUI
+        ),
+        onEnterFullscreen: (controller) {
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        },
+
+        onExitFullscreen: (controller) {
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+        },
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
