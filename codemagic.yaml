@@ -1,29 +1,12 @@
 workflows:
-
-  simulator-workflow:
-
-    name: Build for simulator
-
+  ios-simulator:
+    name: iOS Simulator Build
+    max_build_duration: 60
     environment:
-
+      flutter: stable
       xcode: latest
-
     scripts:
-
-      - name: Build with Generic Destination
-
-        script: |
-
-          xcodebuild build \
-
-            -project "yourproject.xcodeproj" \
-
-            -scheme "yourscheme" \
-
-            -sdk iphonesimulator \
-
-            -configuration Debug          
-
+      - flutter pub get
+      - flutter build ios --simulator --debug
     artifacts:
-
-      - /Users/builder/Library/Developer/Xcode/DerivedData/**/*.app
+      - build/ios/iphonesimulator/*.app
