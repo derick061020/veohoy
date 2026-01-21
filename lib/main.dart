@@ -52,8 +52,8 @@ class _SplashScreenState extends State<SplashScreen> {
         backgroundColor: Colors.white,
         body: Center(
           child: Image.asset(
-            'assets/icon_foreground.png', // MISMA imagen que flutter_native_splash
-            width: MediaQuery.of(context).size.width * 0.55,
+            'assets/icon_foreground_android.png', // MISMA imagen que flutter_native_splash
+            width: MediaQuery.of(context).size.width,
             fit: BoxFit.contain,
           ),
         ),
