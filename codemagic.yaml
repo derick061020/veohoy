@@ -1,26 +1,29 @@
 workflows:
-  ios_ipa:
-    name: iOS IPA (Flutter)
-    max_build_duration: 60
-    instance_type: mac_mini_m2
+
+  simulator-workflow:
+
+    name: Build for simulator
 
     environment:
-      flutter: stable
+
       xcode: latest
-      cocoapods: default
-      groups:
-        - app_store_credentials
 
     scripts:
-      - name: Install dependencies
-        script: |
-          flutter pub get
 
-      - name: Build iOS IPA
+      - name: Build with Generic Destination
+
         script: |
-          flutter build ipa \
-            --release \
-            --export-method development
+
+          xcodebuild build \
+
+            -project "yourproject.xcodeproj" \
+
+            -scheme "yourscheme" \
+
+            -sdk iphonesimulator \
+
+            -configuration Debug          
 
     artifacts:
-      - build/ios/ipa/*.ipa
+
+      - /Users/builder/Library/Developer/Xcode/DerivedData/**/*.app
