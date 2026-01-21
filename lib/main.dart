@@ -19,7 +19,48 @@ InAppWebViewController? globalWebViewController;
 Future<void> _firebaseBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 }
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => MyHomeScreen()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: Image.asset(
+            'assets/launch_logo.png', // MISMA imagen que flutter_native_splash
+            width: MediaQuery.of(context).size.width * 0.55,
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
+    );
+  }
+}
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -51,21 +92,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Change Status Bar Color',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,  // Color de fondo general
+        scaffoldBackgroundColor: Colors.white,
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      debugShowCheckedModeBanner: false,
-      home: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(
-          statusBarColor: Colors.white,  // Color de la barra de estado
-          statusBarIconBrightness: Brightness.dark,  // Iconos oscuros
-          systemNavigationBarColor: Colors.white,  // Color de la barra de navegación
-          systemNavigationBarIconBrightness: Brightness.dark,
-        ),
-        child: MyHomeScreen(),
-      ),
+      home: const SplashScreen(), // 🔥 AQUÍ
     );
   }
 }
