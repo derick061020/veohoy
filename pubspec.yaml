@@ -79,7 +79,7 @@ flutter_launcher_icons:
   min_sdk_android: 21
 flutter_native_splash:
   color: "#ffffff"         # Fondo blanco
-  image: assets/icon_foreground.png    # Logo
+  image: assets/icon_foreground_android.png    # Logo
   android: true
   ios: true
   ios_content_mode: scaleAspectFit
