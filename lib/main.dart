@@ -1,12 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'firebase_options.dart'; // <- generado por flutterfire configure
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 
@@ -28,7 +28,9 @@ void main() async {
     await InAppWebViewController.setWebContentsDebuggingEnabled(true);
   }
 
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform, // <- usa el archivo generado
+  );
 
   FirebaseMessaging.onBackgroundMessage(_firebaseBackgroundHandler);
 
@@ -185,45 +187,51 @@ Widget build(BuildContext context) {
   return Scaffold(
     backgroundColor: Colors.white,
     body: SafeArea(
-      child: InAppWebView(
-        initialUrlRequest: URLRequest(
-          url: WebUri('https://veohoy.com'),
+      child: Container(
+        color: Colors.white, // 🔹 fondo blanco mientras carga
+        child: InAppWebView(
+          initialUrlRequest: URLRequest(
+            url: WebUri('https://veohoy.com'),
+          ),
+          pullToRefreshController: _pullToRefreshController,
+          onWebViewCreated: (controller) {
+            _controller = controller;
+            globalWebViewController = controller;
+          },
+
+          shouldOverrideUrlLoading: (controller, navigationAction) async {
+            return NavigationActionPolicy.ALLOW;
+          },
+
+          onLoadStop: (controller, url) {
+            _pullToRefreshController.endRefreshing();
+            _controller?.evaluateJavascript(source: "document.body.style.backgroundColor = 'white';");
+          },
+
+          onLoadError: (controller, url, code, message) {
+            _pullToRefreshController.endRefreshing();
+          },
+
+          initialSettings: InAppWebViewSettings(
+            javaScriptEnabled: true,
+            useShouldOverrideUrlLoading: true,
+            allowsInlineMediaPlayback: false,
+            mediaPlaybackRequiresUserGesture: false,
+            userAgent: Platform.isAndroid
+                ? "com.ccdevllc.veohoy.android"
+                : "com.ccdevllc.veohoy.ios",
+            transparentBackground: false, // 🔹 importante
+          ),
+          
+
+          onEnterFullscreen: (controller) {
+            SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+          },
+
+          onExitFullscreen: (controller) {
+            SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+          },
         ),
-
-        pullToRefreshController: _pullToRefreshController,
-
-        onWebViewCreated: (controller) {
-          _controller = controller;
-          globalWebViewController = controller;
-        },
-
-        // 🔥 ESTO ES LO QUE FALTABA
-        shouldOverrideUrlLoading: (controller, navigationAction) async {
-          return NavigationActionPolicy.ALLOW;
-        },
-
-        onLoadStop: (controller, url) {
-          _pullToRefreshController.endRefreshing();
-        },
-
-        onLoadError: (controller, url, code, message) {
-          _pullToRefreshController.endRefreshing();
-        },
-
-        initialSettings: InAppWebViewSettings(
-          javaScriptEnabled: true,
-          useShouldOverrideUrlLoading: true,
-          allowsInlineMediaPlayback: false,
-          mediaPlaybackRequiresUserGesture: false,
-          userAgent: Platform.isAndroid ? "com.ccdevllc.veohoy.android" : "com.ccdevllc.veohoy.ios", // 🔥 AQUI
-        ),
-        onEnterFullscreen: (controller) {
-          SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-        },
-
-        onExitFullscreen: (controller) {
-          SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-        },
       ),
     ),
   );
