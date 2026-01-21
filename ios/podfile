@@ -7,19 +7,8 @@ use_modular_headers!
 inhibit_all_warnings!
 
 target 'Runner' do
-  # Flutter plugin pods
-  pod 'Flutter', :path => '../.flutter'
-  
-  # Firebase pods
-  pod 'Firebase/Core'
-  pod 'Firebase/Messaging'
-  
-  # Local notifications
-  pod 'FlutterLocalNotifications', :path => '../.flutter'
-  
-  # WebView
-  pod 'webview_flutter', :path => '../.flutter'
-
+  # Instala automáticamente los pods de Flutter
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
