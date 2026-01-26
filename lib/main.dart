@@ -248,8 +248,8 @@ Widget build(BuildContext context) {
           initialSettings: InAppWebViewSettings(
             javaScriptEnabled: true,
             useShouldOverrideUrlLoading: true,
-            allowsInlineMediaPlayback: false,
-            mediaPlaybackRequiresUserGesture: false,
+            allowsInlineMediaPlayback: true,
+            mediaPlaybackRequiresUserGesture: true,
             userAgent: Platform.isAndroid
                 ? "com.ccdevllc.veohoy.android"
                 : "com.ccdevllc.veohoy.ios",
