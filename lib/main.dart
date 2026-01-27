@@ -33,11 +33,15 @@ class _SplashScreenState extends State<SplashScreen> {
 
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => MyHomeScreen()),
-      );
-    });
-  }
+            context,
+            PageRouteBuilder(
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+              pageBuilder: (_, __, ___) => MyHomeScreen(),
+            ),
+          );
+        });
+      }
 
   @override
   Widget build(BuildContext context) {
