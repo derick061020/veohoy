@@ -49,5 +49,11 @@
 		<false/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+        <key>NSCameraUsageDescription</key>
+		<string>We use the camera so users can record and upload videos.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>We use the microphone so users can record videos with sound.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>We use the photo library so users can upload videos.</string>
 	</dict>
 </plist>
