@@ -73,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   height: 12.0,
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    strokeWidth: 1.5,
+                    strokeWidth: 3.0,
                   ),
                 ),
               ),
@@ -311,7 +311,7 @@ Widget build(BuildContext context) {
             right: 0,
             child: Center(
               child: Container(
-                padding: EdgeInsets.all(12),
+                padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
@@ -324,9 +324,13 @@ Widget build(BuildContext context) {
                     ),
                   ],
                 ),
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-                  strokeWidth: 2.5,
+                child: SizedBox(
+                  width: 16.0,
+                  height: 16.0,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                    strokeWidth: 1.5,
+                  ),
                 ),
               ),
             ),
