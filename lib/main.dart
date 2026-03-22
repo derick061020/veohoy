@@ -131,6 +131,7 @@ class MyHomeScreen extends StatefulWidget {
 class _MyHomeScreenState extends State<MyHomeScreen> {
   InAppWebViewController? _controller;
   late PullToRefreshController _pullToRefreshController;
+  bool _isLoading = true;
 
 
   @override
@@ -237,10 +238,12 @@ Future<void> _showNotification(RemoteMessage message) async {
 Widget build(BuildContext context) {
   return Scaffold(
     backgroundColor: Colors.white,
-    body: SafeArea(
-      child: Container(
-        color: Colors.white, // 🔹 fondo blanco mientras carga
-        child: InAppWebView(
+    body: Stack(
+      children: [
+        SafeArea(
+          child: Container(
+            color: Colors.white, // 🔹 fondo blanco mientras carga
+            child: InAppWebView(
           initialUrlRequest: URLRequest(
             url: WebUri('https://veohoy.com'),
           ),
@@ -254,12 +257,24 @@ Widget build(BuildContext context) {
             return NavigationActionPolicy.ALLOW;
           },
 
+          onLoadStart: (controller, url) {
+            setState(() {
+              _isLoading = true;
+            });
+          },
+
           onLoadStop: (controller, url) {
+            setState(() {
+              _isLoading = false;
+            });
             _pullToRefreshController.endRefreshing();
             _controller?.evaluateJavascript(source: "document.body.style.backgroundColor = 'white';");
           },
 
           onLoadError: (controller, url, code, message) {
+            setState(() {
+              _isLoading = false;
+            });
             _pullToRefreshController.endRefreshing();
           },
 
@@ -274,7 +289,6 @@ Widget build(BuildContext context) {
             transparentBackground: false, // 🔹 importante
           ),
           
-
           onEnterFullscreen: (controller) {
             SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
           },
@@ -284,6 +298,27 @@ Widget build(BuildContext context) {
           },
         ),
       ),
+    ),
+        if (_isLoading)
+          Positioned(
+            top: 20,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Color(0xFF626a6d),
+                  shape: BoxShape.circle,
+                ),
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  strokeWidth: 2.0,
+                ),
+              ),
+            ),
+          ),
+      ],
     ),
   );
 }
