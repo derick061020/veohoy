@@ -47,19 +47,33 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.white,
-        statusBarIconBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.white,
-        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarColor: Color(0xFF626a6d),
+        statusBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: Color(0xFF626a6d),
+        systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
-          child: Image.asset(
-            'assets/icon_foreground_android.png', // MISMA imagen que flutter_native_splash
-            width: MediaQuery.of(context).size.width,
-            fit: BoxFit.contain,
-          ),
+        backgroundColor: const Color(0xFF626a6d),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Center(
+                child: Image.asset(
+                  'assets/icon_foreground_android.png', // MISMA imagen que flutter_native_splash
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 50.0),
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                strokeWidth: 3.0,
+              ),
+            ),
+          ],
         ),
       ),
     );
