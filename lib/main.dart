@@ -54,26 +54,27 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
       child: Scaffold(
         backgroundColor: const Color(0xFF626a6d),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        body: Stack(
           children: [
-            Expanded(
-              child: Center(
-                child: Image.asset(
-                  'assets/icon_foreground_android.png', // MISMA imagen que flutter_native_splash
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  fit: BoxFit.contain,
-                ),
+            Center(
+              child: Image.asset(
+                'assets/icon_foreground_android.png', // MISMA imagen que flutter_native_splash
+                width: MediaQuery.of(context).size.width * 0.8,
+                fit: BoxFit.contain,
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.only(bottom: 50.0),
-              child: SizedBox(
-                width: 20.0,
-                height: 20.0,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  strokeWidth: 2.0,
+            Positioned(
+              bottom: 50.0,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: SizedBox(
+                  width: 12.0,
+                  height: 12.0,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    strokeWidth: 1.5,
+                  ),
                 ),
               ),
             ),
