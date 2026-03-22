@@ -69,8 +69,8 @@ class _SplashScreenState extends State<SplashScreen> {
               right: 0,
               child: Center(
                 child: SizedBox(
-                  width: 12.0,
-                  height: 12.0,
+                  width: 20.0,
+                  height: 20.0,
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     strokeWidth: 3.0,
