@@ -58,6 +58,7 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
+              flex: 2,
               child: Center(
                 child: Image.asset(
                   'assets/icon_foreground_android.png', // MISMA imagen que flutter_native_splash
@@ -66,6 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
             ),
+            const Spacer(flex: 1),
             const Padding(
               padding: EdgeInsets.only(bottom: 50.0),
               child: CircularProgressIndicator(
@@ -301,19 +303,27 @@ Widget build(BuildContext context) {
     ),
         if (_isLoading)
           Positioned(
-            top: 20,
+            top: 60,
             left: 0,
             right: 0,
             child: Center(
               child: Container(
-                padding: EdgeInsets.all(8),
+                padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Color(0xFF626a6d),
+                  color: Colors.white,
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      spreadRadius: 2,
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  strokeWidth: 2.0,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                  strokeWidth: 2.5,
                 ),
               ),
             ),
