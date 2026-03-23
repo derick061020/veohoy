@@ -87,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen> {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔥 NECESARIO para flutter_inappwebview
+  // NECESARIO para flutter_inappwebview
   if (Platform.isAndroid) {
     await InAppWebViewController.setWebContentsDebuggingEnabled(true);
   }
@@ -292,6 +292,9 @@ Widget build(BuildContext context) {
                 ? "com.ccdevllc.veohoy.android"
                 : "com.ccdevllc.veohoy.ios",
             transparentBackground: false, // 🔹 importante
+            supportZoom: false,
+            builtInZoomControls: false,
+            displayZoomControls: false,
           ),
           
           onEnterFullscreen: (controller) {
